@@ -1,15 +1,25 @@
 <div align="center">
   <img src="https://storage.googleapis.com/hume-public-logos/hume/hume-banner.png">
-  <h1>Empathic Voice Interface | Next.js App Router Quickstart</h1>
+  <h1>Empathic Voice Interface | Next.js App Router with Chat History</h1>
 </div>
 
 ![preview.png](preview.png)
 
 ## Overview
 
-This project features a sample implementation of Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) using Hume's [React SDK](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/react). Here, we have a simple EVI that uses the Next.js App Router.
+This project features an enhanced implementation of Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) using Hume's [React SDK](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/react). Built with Next.js App Router, it includes both real-time voice interaction and chat history features with emotion analysis.
 
-See the [Quickstart guide](https://dev.hume.ai/docs/empathic-voice-interface-evi/quickstart/nextjs) for a detailed explanation of the code in this project.
+### Key Features
+
+- 🎙️ Real-time voice interaction with EVI
+- 📊 Emotion analysis for user interactions
+- 💬 Chat history with emotion tracking
+- 🎨 Modern UI with dark/light mode support
+- 📱 Responsive design
+- 🔍 Historical conversation browsing
+- 📈 Emotion trend analysis per conversation
+
+See the [Quickstart guide](https://dev.hume.ai/docs/empathic-voice-interface-evi/quickstart/nextjs) for a detailed explanation of the base EVI implementation.
 
 ## Project deployment
 
@@ -22,7 +32,7 @@ Below are the steps to completing deployment:
 1. Create a Git Repository for your project.
 2. Provide the required environment variables. To get your API key and Secret key, log into the Hume AI Platform and visit the [API keys page](https://platform.hume.ai/settings/keys).
 
-## Modify the project
+## Local Development
 
 1. Clone this examples repository:
 
@@ -69,3 +79,44 @@ Below are the steps to completing deployment:
    ```shell
    npm run dev
    ```
+
+## Features Guide
+
+### Chat History
+
+The application includes a comprehensive chat history feature that allows you to:
+
+- View past conversations in a side panel
+- See detailed emotion analysis for each user message
+- Track emotion trends across conversations
+- View timestamps for each message
+- Navigate between different chat sessions
+
+### Emotion Analysis
+
+Each user message in the chat history includes:
+
+- Top 3 detected emotions with scores
+- Visual indicators for emotion intensity
+- Overall emotion trends for the entire conversation
+
+### UI/UX Features
+
+- Responsive chat interface
+- Dark/light mode support
+- Real-time voice visualization
+- Message bubbles with clear user/assistant distinction
+- Easy navigation between live chat and history
+
+## Technologies Used
+
+- Next.js 14 with App Router
+- React 18
+- TailwindCSS for styling
+- Hume AI Voice SDK
+- Framer Motion for animations
+- TypeScript for type safety
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.

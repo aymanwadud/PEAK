@@ -13,6 +13,11 @@ export default function ClientComponent({
 }) {
   const timeout = useRef<number | null>(null);
   const ref = useRef<ComponentRef<typeof Messages> | null>(null);
+  const configId = process.env.NEXT_PUBLIC_HUME_EVI_CONFIG_ID;
+
+  if (!configId) {
+    console.warn('No EVI configuration ID found in environment variables. Using default configuration.');
+  }
 
   return (
     <div
@@ -21,7 +26,7 @@ export default function ClientComponent({
       }
     >
       <VoiceProvider
-        configId="f60292dc-6573-41f5-8da7-7e8aa83635cc"
+        configId={configId}
         auth={{ type: "accessToken", value: accessToken }}
         onMessage={() => {
           if (timeout.current) {
