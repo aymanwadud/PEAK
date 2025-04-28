@@ -2,10 +2,17 @@
 
 import { useLayoutEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, PanelLeftOpen, PanelLeftClose, PlusCircle } from "lucide-react"; // Import PlusCircle icon
 import pkg from "@/package.json";
 
-export const Nav = () => {
+// Define props for Nav component
+interface NavProps {
+  toggleSidebar: () => void;
+  isSidebarOpen: boolean;
+  onNewChat: () => void; // Add prop for new chat handler
+}
+
+export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => { // Destructure props
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useLayoutEffect(() => {
@@ -27,9 +34,33 @@ export const Nav = () => {
   return (
     <div
       className={
-        "px-4 py-2 flex items-center h-14 z-50 bg-card border-b border-border"
+        "px-4 py-2 flex items-center h-14 z-50 bg-card border-b border-border flex-shrink-0"
       }
     >
+      {/* Sidebar Toggle Button */}
+      <Button
+        onClick={toggleSidebar}
+        variant={"ghost"}
+        size={"icon"}
+        className={"mr-1"} // Adjust margin
+        aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+      >
+        {isSidebarOpen ? (
+          <PanelLeftClose className={"size-5"} />
+        ) : (
+          <PanelLeftOpen className={"size-5"} />
+        )}
+      </Button>
+      {/* New Chat Button */}
+      <Button
+        onClick={onNewChat}
+        variant={"ghost"}
+        size={"icon"}
+        className={"mr-2"}
+        aria-label={"New Chat / Live View"}
+      >
+        <PlusCircle className={"size-5"} />
+      </Button>
       <div>
         <span className="font-semibold text-lg">MindFlow</span>
       </div>

@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-import { Nav } from "@/components/Nav";
 import { cn } from "@/utils";
-// Import the sidebar (we'll handle state later)
-// import ChatHistorySidebar from "@/components/ChatHistorySidebar";
 
 export const metadata: Metadata = {
   title: "MindFlow",
@@ -27,7 +24,6 @@ export default function RootLayout({
           "flex flex-col h-screen overflow-hidden"
         )}
       >
-        <Nav />
         <main className="flex-grow flex flex-col h-full">
           {children}
         </main>

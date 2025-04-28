@@ -3,7 +3,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { Phone } from "lucide-react";
 
-export default function StartCall() {
+interface StartCallProps {
+  isSidebarOpen: boolean;
+}
+
+export default function StartCall({ isSidebarOpen }: StartCallProps) {
   const { status, connect } = useVoice();
 
   return (
@@ -21,6 +25,10 @@ export default function StartCall() {
             enter: { opacity: 1 },
             exit: { opacity: 0 },
           }}
+          style={{
+            marginLeft: isSidebarOpen ? "16rem" : "0", // 16rem = w-64 from sidebar
+            transition: "margin-left 0.3s ease-in-out"
+          }}
         >
           <AnimatePresence>
             <motion.div
@@ -31,7 +39,8 @@ export default function StartCall() {
               }}
             >
               <Button
-                className={"z-50 flex items-center gap-1.5"}
+                size="lg"
+                className="z-50 flex items-center gap-3 px-8 py-6 text-lg h-auto shadow-lg hover:shadow-xl transition-shadow"
                 onClick={() => {
                   connect()
                     .then(() => {})
@@ -41,9 +50,9 @@ export default function StartCall() {
               >
                 <span>
                   <Phone
-                    className={"size-4 opacity-50"}
+                    className="size-6 opacity-50"
                     strokeWidth={2}
-                    stroke={"currentColor"}
+                    stroke="currentColor"
                   />
                 </span>
                 <span>Start Call</span>

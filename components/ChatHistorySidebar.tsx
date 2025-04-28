@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { PanelLeftOpen, PanelLeftClose, History, Loader2 } from 'lucide-react';
+import { History, Loader2 } from 'lucide-react'; // Removed PanelLeftOpen, PanelLeftClose
 import { cn } from '@/utils';
 
 // Define the structure of a chat summary item
@@ -55,15 +55,7 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
 
   const handleSelectChatGroup = (groupId: string) => { // Renamed handler
     onSelectChatGroup(groupId); // Call prop with groupId
-    // Optionally close sidebar on selection, or keep it open
-    // setIsOpen(false);
   };
-
-  const handleNewChat = () => {
-    onSelectChatGroup(null); // Signal to start/show the live chat
-    // Optionally close sidebar
-    // setIsOpen(false);
-  }
 
   return (
     // Sidebar Panel - Removed fixed positioning and translate-x
@@ -83,11 +75,6 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
           <h2 className="text-lg font-semibold mb-4 flex items-center">
             <History className="mr-2 h-5 w-5" /> Chat History
           </h2>
-
-          {/* Button to go back to live/new chat */}
-          <Button variant="outline" onClick={handleNewChat} className="mb-4">
-            New Chat / Live View
-          </Button>
 
           <div className="flex-grow overflow-y-auto">
             {isLoading && (

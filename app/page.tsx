@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from "next/dynamic";
 import ChatHistorySidebar from '@/components/ChatHistorySidebar'; // Import the sidebar
-import { Loader2 } from 'lucide-react'; // For loading indicator
-// Import base type and specific message types if available, or use base type and check properties
-// Removed AgentMessage as it's not directly exported; will rely on type/role checks
+import { Loader2, PanelLeftOpen, PanelLeftClose } from 'lucide-react'; // For loading indicator and sidebar toggle icons
+import { Nav } from '@/components/Nav'; // Import Nav
+import { Button } from '@/components/ui/button'; // Import Button
 import { ReturnChatEvent, EmotionScores, UserMessage, ReturnChatEventRole } from "hume/api/resources/empathicVoice";
 
 // Add type definitions at the top with other types
@@ -102,6 +102,19 @@ export default function Page() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
   const [processedHistory, setProcessedHistory] = useState<ProcessedHistory | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Add state for sidebar visibility
+
+  // Function to toggle sidebar
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Function to handle selecting a new chat / live view
+  const handleNewChat = () => {
+    setSelectedChatGroupId(null);
+    // Optionally close the sidebar when starting a new chat
+    // setIsSidebarOpen(false);
+  };
 
   // Function to fetch and process chat history
   const fetchChatHistory = useCallback(async (groupId: string) => {
@@ -186,7 +199,8 @@ export default function Page() {
     if (selectedChatGroupId) {
       fetchChatHistory(selectedChatGroupId);
     } else {
-      setHistoricalEvents([]);
+      // Clear history display when no group is selected (live chat mode)
+      setProcessedHistory(null);
       setErrorHistory(null);
     }
   }, [selectedChatGroupId, fetchChatHistory]);
@@ -205,127 +219,142 @@ export default function Page() {
        return <div className="flex justify-center items-center grow text-red-500">Failed to load access token. Cannot start live chat.</div>;
     }
 
-    if (selectedChatGroupId) {
-      if (isLoadingHistory) {
-        return <div className="flex justify-center items-center grow"><Loader2 className="h-8 w-8 animate-spin" /><span>&nbsp;Loading History...</span></div>;
-      }
-      if (errorHistory) {
-        return <div className="flex justify-center items-center grow text-red-500">{errorHistory}</div>;
-      }
-      
-      // Display processed history if available
-      if (processedHistory) {
-        return (
-          <div className="flex flex-col h-full overflow-hidden">
-            {/* Header section - sticky */}
-            <div className="flex-none px-4 py-2 bg-background">
-              <h2 className="text-xl font-semibold mb-2">Chat History</h2>
-              <div className="mb-4">
-                <h4 className="font-medium mb-1">Overall Top 3 User Emotions:</h4>
-                {processedHistory.topEmotions.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {processedHistory.topEmotions.map((emo, index) => (
-                      <span key={index} className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
-                        {emo.name}: {emo.score.toFixed(3)}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No user emotion data found.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Messages container - scrollable */}
-            <div className="flex-1 overflow-y-auto min-h-0">
-              <div className="space-y-6 p-4">
-                {processedHistory.emotionsPerMessage.map((msg, index) => (
-                  <div key={index} className={`flex ${msg.role === 'USER' ? 'justify-end' : 'justify-start'} relative`}>
-                    <div 
-                      className={`
-                        max-w-[80%] 
-                        ${msg.role === 'USER' 
-                          ? 'bg-blue-100 dark:bg-blue-900 ml-4' 
-                          : 'bg-gray-100 dark:bg-gray-800 mr-4'
-                        } 
-                        rounded-2xl p-4
-                        relative
-                        ${msg.role === 'USER' 
-                          ? 'rounded-br-sm' 
-                          : 'rounded-bl-sm'
-                        }
-                      `}
-                    >
-                      {/* Time */}
-                      <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">
-                        {new Date(msg.timestamp).toLocaleTimeString()}
-                      </div>
-                      
-                      {/* Message Text */}
-                      <div className="text-sm break-words">{msg.text}</div>
-
-                      {/* Emotion Scores for User Messages */}
-                      {msg.emotions && msg.role === 'USER' && (
-                        <div className="mt-2 pt-2 border-t border-black dark:border-white">
-                          <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">
-                            Top Emotions:
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {msg.emotions.map((emo, emoIndex) => (
-                              <span 
-                                key={emoIndex} 
-                                className="
-                                  bg-white/50 dark:bg-black/20 
-                                  px-2 py-0.5 rounded-full
-                                  text-[11px] text-gray-700 dark:text-gray-300
-                                "
-                              >
-                                {emo.name}: {emo.score.toFixed(3)}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Chat Bubble Triangle */}
-                      <div 
-                        className={`
-                          absolute bottom-[15px]
-                          ${msg.role === 'USER' 
-                            ? 'right-[-8px] border-l-[8px] border-l-blue-100 dark:border-l-blue-900' 
-                            : 'left-[-8px] border-r-[8px] border-r-gray-100 dark:border-r-gray-800'
-                          }
-                          border-y-[6px] border-y-transparent
-                          w-0 h-0
-                        `}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      }
+    // Show live chat if no history is selected
+    if (!selectedChatGroupId) {
+      return accessToken ? <Chat accessToken={accessToken} isSidebarOpen={isSidebarOpen} /> : 
+        <div className="flex justify-center items-center grow">Select a chat from the history or start a new one.</div>;
     }
 
-    // Show live chat if no history is selected
-    return accessToken ? <Chat accessToken={accessToken} /> : 
-      <div className="flex justify-center items-center grow">Select a chat from the history or start a new one.</div>;
+    // If a chat group is selected, show history
+    if (isLoadingHistory) {
+      return <div className="flex justify-center items-center grow"><Loader2 className="h-8 w-8 animate-spin" /><span>&nbsp;Loading History...</span></div>;
+    }
+    if (errorHistory) {
+      return <div className="flex justify-center items-center grow text-red-500">{errorHistory}</div>;
+    }
+    
+    // Display processed history if available
+    if (processedHistory) {
+      // ...rest of the processedHistory rendering code...
+      return (
+        <div className="flex flex-col h-full overflow-hidden">
+          {/* ...existing history display code... */}
+          {/* Header section - sticky */}
+          <div className="flex-none px-4 py-2 bg-background">
+            <h2 className="text-xl font-semibold mb-2">Chat History</h2>
+            <div className="mb-4">
+              <h4 className="font-medium mb-1">Overall Top 3 User Emotions:</h4>
+              {processedHistory.topEmotions.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {processedHistory.topEmotions.map((emo, index) => (
+                    <span key={index} className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
+                      {emo.name}: {emo.score.toFixed(3)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No user emotion data found.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Messages container - scrollable */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="space-y-6 p-4">
+              {processedHistory.emotionsPerMessage.map((msg, index) => (
+                <div key={index} className={`flex ${msg.role === 'USER' ? 'justify-end' : 'justify-start'} relative`}>
+                  <div 
+                    className={`
+                      max-w-[80%] 
+                      ${msg.role === 'USER' 
+                        ? 'bg-blue-100 dark:bg-blue-900 ml-4' 
+                        : 'bg-gray-100 dark:bg-gray-800 mr-4'
+                      } 
+                      rounded-2xl p-4
+                      relative
+                      ${msg.role === 'USER' 
+                        ? 'rounded-br-sm' 
+                        : 'rounded-bl-sm'
+                      }
+                    `}
+                  >
+                    {/* Time */}
+                    <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">
+                      {new Date(msg.timestamp).toLocaleTimeString()}
+                    </div>
+                    
+                    {/* Message Text */}
+                    <div className="text-sm break-words">{msg.text}</div>
+
+                    {/* Emotion Scores for User Messages */}
+                    {msg.emotions && msg.role === 'USER' && (
+                      <div className="mt-2 pt-2 border-t border-black dark:border-white">
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">
+                          Top Emotions:
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {msg.emotions.map((emo, emoIndex) => (
+                            <span 
+                              key={emoIndex} 
+                              className="
+                                bg-white/50 dark:bg-black/20 
+                                px-2 py-0.5 rounded-full
+                                text-[11px] text-gray-700 dark:text-gray-300
+                              "
+                            >
+                              {emo.name}: {emo.score.toFixed(3)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Chat Bubble Triangle */}
+                    <div 
+                      className={`
+                        absolute bottom-[15px]
+                        ${msg.role === 'USER' 
+                          ? 'right-[-8px] border-l-[8px] border-l-blue-100 dark:border-l-blue-900' 
+                          : 'left-[-8px] border-r-[8px] border-r-gray-100 dark:border-r-gray-800'
+                        }
+                        border-y-[6px] border-y-transparent
+                        w-0 h-0
+                      `}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle case where history is selected but not yet loaded/processed
+    return <div className="flex justify-center items-center grow">Loading selected chat...</div>;
   };
 
   return (
-    // Update the outer container to be full height and handle overflow properly
-    <div className="flex flex-row h-[calc(100vh-4rem)] overflow-hidden"> 
-      {/* Sidebar with fixed width */}
-      <ChatHistorySidebar 
-        onSelectChatGroup={handleSelectChatGroup} 
-        currentChatGroupId={selectedChatGroupId} 
-        isOpen={true}
+    // Main container for the whole page, including Nav
+    <div className="flex flex-col h-screen">
+      {/* Pass toggle function, state, and new chat handler to Nav */}
+      <Nav 
+        toggleSidebar={toggleSidebar} 
+        isSidebarOpen={isSidebarOpen} 
+        onNewChat={handleNewChat} // Pass the handler here
       />
-      {/* Main content area - make it full height and handle overflow */}
-      <div className="grow flex flex-col h-full overflow-hidden">
-        {renderContent()}
+      {/* Container for sidebar and main content */}
+      <div className="flex flex-row flex-grow overflow-hidden"> 
+        {/* Pass isOpen state to Sidebar */}
+        <ChatHistorySidebar 
+          onSelectChatGroup={handleSelectChatGroup} 
+          currentChatGroupId={selectedChatGroupId} 
+          isOpen={isSidebarOpen} // Use state here
+        />
+        {/* Main content area */}
+        <div className="grow flex flex-col h-full overflow-hidden">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

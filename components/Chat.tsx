@@ -6,11 +6,15 @@ import Controls from "./Controls";
 import StartCall from "./StartCall";
 import { ComponentRef, useRef } from "react";
 
+interface ClientComponentProps {
+  accessToken: string;
+  isSidebarOpen: boolean;
+}
+
 export default function ClientComponent({
   accessToken,
-}: {
-  accessToken: string;
-}) {
+  isSidebarOpen,
+}: ClientComponentProps) {
   const timeout = useRef<number | null>(null);
   const ref = useRef<ComponentRef<typeof Messages> | null>(null);
   const configId = process.env.NEXT_PUBLIC_HUME_EVI_CONFIG_ID;
@@ -47,7 +51,7 @@ export default function ClientComponent({
       >
         <Messages ref={ref} />
         <Controls />
-        <StartCall />
+        <StartCall isSidebarOpen={isSidebarOpen} />
       </VoiceProvider>
     </div>
   );
