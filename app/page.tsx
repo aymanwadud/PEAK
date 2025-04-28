@@ -102,7 +102,7 @@ export default function Page() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
   const [processedHistory, setProcessedHistory] = useState<ProcessedHistory | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Add state for sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed default to false
 
   // Function to toggle sidebar
   const toggleSidebar = () => {

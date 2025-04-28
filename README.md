@@ -1,25 +1,24 @@
 <div align="center">
   <img src="https://storage.googleapis.com/hume-public-logos/hume/hume-banner.png">
-  <h1>Empathic Voice Interface | Next.js App Router with Chat History</h1>
+  <h1>PeakForm | Athletic Performance Analytics</h1>
 </div>
 
 ![preview.png](preview.png)
 
 ## Overview
 
-This project features an enhanced implementation of Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) using Hume's [React SDK](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/react). Built with Next.js App Router, it includes both real-time voice interaction and chat history features with emotion analysis.
+PeakForm is an advanced athletic performance tracking platform that combines Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) with performance analytics to help athletes optimize their mental game and achieve peak performance. Built with Next.js App Router, it includes both real-time emotional state tracking and comprehensive performance analytics.
 
 ### Key Features
 
-- 🎙️ Real-time voice interaction with EVI
-- 📊 Emotion analysis for user interactions
-- 💬 Chat history with emotion tracking
-- 🎨 Modern UI with dark/light mode support
+- 🎯 Sport-specific performance metrics
+- 🎨 Real-time emotional state tracking
+- 📊 Performance analytics with emotion correlation
+- 💫 Post-game recovery analysis
+- 🔍 Historical performance tracking
+- 📈 Emotional trend analysis
+- 🎙️ Voice-based interaction
 - 📱 Responsive design
-- 🔍 Historical conversation browsing
-- 📈 Emotion trend analysis per conversation
-
-See the [Quickstart guide](https://dev.hume.ai/docs/empathic-voice-interface-evi/quickstart/nextjs) for a detailed explanation of the base EVI implementation.
 
 ## Project deployment
 

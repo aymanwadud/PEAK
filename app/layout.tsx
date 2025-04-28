@@ -3,10 +3,11 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { cn } from "@/utils";
+import { SportProvider } from "@/context/SportContext";
 
 export const metadata: Metadata = {
-  title: "MindFlow",
-  description: "A Next.js starter using Hume AI's Empathic Voice Interface",
+  title: "PeakForm",
+  description: "Track and optimize your athletic performance through emotional intelligence",
 };
 
 export default function RootLayout({
@@ -25,7 +26,9 @@ export default function RootLayout({
         )}
       >
         <main className="flex-grow flex flex-col h-full">
-          {children}
+          <SportProvider>
+            {children}
+          </SportProvider>
         </main>
       </body>
     </html>
