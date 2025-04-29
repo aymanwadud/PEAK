@@ -102,7 +102,8 @@ export default function Page() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [errorHistory, setErrorHistory] = useState<string | null>(null);
   const [processedHistory, setProcessedHistory] = useState<ProcessedHistory | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed default to false
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [accessTokenError, setAccessTokenError] = useState<{error: string; details?: string} | null>(null);
 
   // Function to toggle sidebar
   const toggleSidebar = () => {
@@ -112,8 +113,10 @@ export default function Page() {
   // Function to handle selecting a new chat / live view
   const handleNewChat = () => {
     setSelectedChatGroupId(null);
-    // Optionally close the sidebar when starting a new chat
-    // setIsSidebarOpen(false);
+  };
+
+  const handleSelectChatGroup = (groupId: string | null) => { // Renamed handler
+    setSelectedChatGroupId(groupId); // Update state with groupId
   };
 
   // Function to fetch and process chat history
@@ -174,19 +177,34 @@ export default function Page() {
   useEffect(() => {
     const fetchTokenFromApi = async () => {
       setIsLoadingToken(true);
+      setAccessTokenError(null);
       try {
         const response = await fetch('/api/get-token'); // Fetch from the new API route
-        if (!response.ok) {
-          throw new Error(`Failed to fetch token: ${response.statusText}`);
-        }
         const data = await response.json();
-        if (!data.accessToken) {
-            throw new Error("Access token not found in API response.");
+        
+        if (!response.ok) {
+          setAccessTokenError(data);
+          setAccessToken(null);
+          return;
         }
+        
+        if (!data.accessToken) {
+          setAccessTokenError({
+            error: 'Invalid token response',
+            details: 'Access token not found in API response'
+          });
+          setAccessToken(null);
+          return;
+        }
+        
         setAccessToken(data.accessToken);
       } catch (error) {
         console.error("Error fetching Hume access token via API:", error);
-        setAccessToken(null); // Ensure token is null on error
+        setAccessTokenError({
+          error: 'Connection error',
+          details: error instanceof Error ? error.message : 'Failed to connect to token service'
+        });
+        setAccessToken(null);
       } finally {
         setIsLoadingToken(false);
       }
@@ -205,14 +223,37 @@ export default function Page() {
     }
   }, [selectedChatGroupId, fetchChatHistory]);
 
-  const handleSelectChatGroup = (groupId: string | null) => { // Renamed handler
-    setSelectedChatGroupId(groupId); // Update state with groupId
-  };
-
   // Decide what content to show - MUST be defined before use in return()
   const renderContent = () => {
     if (isLoadingToken) {
-      return <div className="flex justify-center items-center grow"><Loader2 className="h-8 w-8 animate-spin" /><span>&nbsp;Loading Access Token...</span></div>;
+      return (
+        <div className="flex flex-col items-center justify-center grow gap-2">
+          <div className="flex items-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading Access Token...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (accessTokenError) {
+      return (
+        <div className="flex flex-col items-center justify-center grow gap-2 p-4">
+          <div className="text-red-500 text-center">
+            <h3 className="text-lg font-semibold mb-2">{accessTokenError.error}</h3>
+            {accessTokenError.details && (
+              <p className="text-sm text-red-400">{accessTokenError.details}</p>
+            )}
+          </div>
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="outline" 
+            className="mt-4"
+          >
+            Retry Connection
+          </Button>
+        </div>
+      );
     }
 
     if (!accessToken && !selectedChatGroupId) {
@@ -335,25 +376,22 @@ export default function Page() {
   };
 
   return (
-    // Main container for the whole page, including Nav
     <div className="flex flex-col h-screen">
-      {/* Pass toggle function, state, and new chat handler to Nav */}
       <Nav 
         toggleSidebar={toggleSidebar} 
         isSidebarOpen={isSidebarOpen} 
-        onNewChat={handleNewChat} // Pass the handler here
+        onNewChat={handleNewChat}
       />
-      {/* Container for sidebar and main content */}
       <div className="flex flex-row flex-grow overflow-hidden"> 
-        {/* Pass isOpen state to Sidebar */}
         <ChatHistorySidebar 
           onSelectChatGroup={handleSelectChatGroup} 
           currentChatGroupId={selectedChatGroupId} 
-          isOpen={isSidebarOpen} // Use state here
+          isOpen={isSidebarOpen}
         />
-        {/* Main content area */}
         <div className="grow flex flex-col h-full overflow-hidden">
-          {renderContent()}
+          <div className="flex-1">
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>

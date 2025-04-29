@@ -24,11 +24,7 @@ export default function ClientComponent({
   }
 
   return (
-    <div
-      className={
-        "relative grow flex flex-col mx-auto w-full overflow-hidden h-[0px]"
-      }
-    >
+    <div className="relative grow flex flex-col mx-auto w-full overflow-hidden h-[0px]">
       <VoiceProvider
         configId={configId}
         auth={{ type: "accessToken", value: accessToken }}
@@ -40,7 +36,6 @@ export default function ClientComponent({
           timeout.current = window.setTimeout(() => {
             if (ref.current) {
               const scrollHeight = ref.current.scrollHeight;
-
               ref.current.scrollTo({
                 top: scrollHeight,
                 behavior: "smooth",

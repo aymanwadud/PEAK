@@ -4,23 +4,44 @@ import { useVoice } from "@humeai/voice-react";
 import Expressions from "./Expressions";
 import { AnimatePresence, motion } from "framer-motion";
 import { ComponentRef, forwardRef } from "react";
+import { useGameSession } from "@/context/GameSessionContext";
 
 const Messages = forwardRef<
   ComponentRef<typeof motion.div>,
   Record<never, never>
 >(function Messages(_, ref) {
   const { messages } = useVoice();
+  const { sessionType } = useGameSession();
+
+  const getSessionBadge = () => {
+    if (!sessionType) return null;
+    const isPreGame = sessionType === 'pre-game';
+    
+    return (
+      <div className={cn(
+        "px-3 py-1 rounded-full text-xs font-medium inline-flex items-center",
+        isPreGame ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
+      )}>
+        {isPreGame ? "Pre-Game Session" : "Post-Game Session"}
+      </div>
+    );
+  };
 
   return (
     <motion.div
       layoutScroll
-      className={"grow rounded-md overflow-auto p-4"}
+      className="grow rounded-md overflow-auto p-4"
       ref={ref}
     >
       <motion.div
-        className={"max-w-2xl mx-auto w-full flex flex-col gap-4 pb-24"}
+        className="max-w-2xl mx-auto w-full flex flex-col gap-4 pb-24"
       >
-        <AnimatePresence mode={"popLayout"}>
+        {sessionType && (
+          <div className="flex justify-center mb-4">
+            {getSessionBadge()}
+          </div>
+        )}
+        <AnimatePresence mode="popLayout">
           {messages.map((msg, index) => {
             if (
               msg.type === "user_message" ||
@@ -55,7 +76,7 @@ const Messages = forwardRef<
                   >
                     {msg.message.role}
                   </div>
-                  <div className={"pb-3 px-3"}>{msg.message.content}</div>
+                  <div className="pb-3 px-3">{msg.message.content}</div>
                   <Expressions values={msg.models.prosody?.scores} />
                 </motion.div>
               );

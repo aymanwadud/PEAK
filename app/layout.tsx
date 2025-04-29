@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { cn } from "@/utils";
 import { SportProvider } from "@/context/SportContext";
+import { GameSessionProvider } from "@/context/GameSessionContext";
 
 export const metadata: Metadata = {
   title: "PeakForm",
@@ -27,7 +28,9 @@ export default function RootLayout({
       >
         <main className="flex-grow flex flex-col h-full">
           <SportProvider>
-            {children}
+            <GameSessionProvider>
+              {children}
+            </GameSessionProvider>
           </SportProvider>
         </main>
       </body>

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { BarChart, PanelLeftOpen, PanelLeftClose, PlusCircle } from "lucide-react";
+import { BarChart, PanelLeftOpen, PanelLeftClose, PlusCircle, GamepadIcon } from "lucide-react";
 import { Settings } from "./Settings";
 
 interface NavProps {
@@ -23,56 +23,60 @@ export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => {
     }
   };
 
-  const handleHomeClick = () => {
-    router.push('/');
+  const handleSessionsClick = () => {
+    if (pathname === '/sessions') {
+      router.push('/');
+    } else {
+      router.push('/sessions');
+    }
   };
 
   return (
     <div className="px-4 py-2 flex items-center h-14 z-50 bg-card border-b border-border flex-shrink-0">
-      {toggleSidebar && isSidebarOpen !== undefined && (
-        <>
+      <div className="flex items-center gap-2">
+        {toggleSidebar && isSidebarOpen !== undefined && (
           <Button
             onClick={toggleSidebar}
             variant="ghost"
             size="icon"
             className="mr-1"
-            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
             {isSidebarOpen ? (
-              <PanelLeftClose className="size-5" />
+              <PanelLeftClose className="h-5 w-5" />
             ) : (
-              <PanelLeftOpen className="size-5" />
+              <PanelLeftOpen className="h-5 w-5" />
             )}
           </Button>
-          <Button
-            onClick={onNewChat}
-            variant="ghost"
-            size="icon"
-            className="mr-2"
-            aria-label="New Chat / Live View"
-          >
-            <PlusCircle className="size-5" />
+        )}
+        {onNewChat && (
+          <Button onClick={onNewChat} variant="ghost" size="icon">
+            <PlusCircle className="h-5 w-5" />
           </Button>
-        </>
-      )}
-      <div>
-        <Button
-          variant="link"
-          className="font-semibold text-lg p-0 h-auto"
-          onClick={handleHomeClick}
-        >
-          PeakForm
-        </Button>
+        )}
       </div>
-      <div className="ml-auto flex items-center gap-1">
+
+      <div className="flex-1 flex items-center justify-center gap-2">
         <Button
           onClick={handleAnalyticsClick}
-          variant={pathname === '/analytics' ? "secondary" : "ghost"}
-          className="flex items-center gap-1.5"
+          variant={pathname === '/analytics' ? 'default' : 'ghost'}
+          className="flex items-center gap-2"
+          size="sm"
         >
-          <BarChart className="size-4" />
+          <BarChart className="h-4 w-4" />
           <span>{pathname === '/analytics' ? 'Sports Psychologist' : 'Performance Analytics'}</span>
         </Button>
+        <Button
+          onClick={handleSessionsClick}
+          variant={pathname === '/sessions' ? 'default' : 'ghost'}
+          className="flex items-center gap-2"
+          size="sm"
+        >
+          <GamepadIcon className="h-4 w-4" />
+          <span>{pathname === '/sessions' ? 'Sports Psychologist' : 'Game Sessions'}</span>
+        </Button>
+      </div>
+
+      <div className="flex items-center">
         <Settings />
       </div>
     </div>
