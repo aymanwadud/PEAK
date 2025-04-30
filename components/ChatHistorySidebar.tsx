@@ -238,19 +238,20 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
     <div
       className={cn(
         "h-full z-30 transition-all duration-300 ease-in-out",
-        "bg-card border-r border-border shadow-lg flex-shrink-0",
-        isOpen ? "w-64 p-4" : "w-0 p-0 overflow-hidden"
+        "bg-card border-r border-border shadow-lg",
+        isOpen ? "w-64" : "w-0 overflow-hidden"
       )}
       aria-hidden={!isOpen}
     >
       {isOpen && (
-        <div className="h-full flex flex-col">
-          <h2 className="text-lg font-semibold mb-4 flex items-center justify-center"> {/* Added justify-center */}
-            <History className="mr-2 h-5 w-5" /> Chat History
-          </h2>
+        <div className="h-full flex flex-col p-4">
+          <div className="flex-none mb-4 flex items-center justify-center">
+            <History className="mr-2 h-5 w-5" /> 
+            <h2 className="text-lg font-semibold">Chat History</h2>
+          </div>
 
-          <div className="flex-grow overflow-y-auto pr-1"> {/* Added pr-1 for scrollbar */}
-            {isLoading && chatGroups.length === 0 && ( // Show loader only on initial load
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {isLoading && chatGroups.length === 0 && (
               <div className="flex justify-center items-center p-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
@@ -262,7 +263,7 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
               <p className="text-muted-foreground text-sm px-2">No chat history found.</p>
             )}
             {chatGroups.length > 0 && (
-              <div>
+              <div className="space-y-4">
                 {renderSection('Today', groupedChats.today, 'today')}
                 {renderSection('Yesterday', groupedChats.yesterday, 'yesterday')}
                 {renderSection('Previous 7 Days', groupedChats.last7days, 'last7days', true)}

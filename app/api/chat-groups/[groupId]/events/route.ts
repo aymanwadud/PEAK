@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { HumeClient } from 'hume';
+import type { ReturnChatEvent } from "hume/api/resources/empathicVoice";
 
-// Ensure you have your Hume API Key stored securely
 const HUME_API_KEY = process.env.HUME_API_KEY;
-const HUME_API_BASE_URL = 'https://api.hume.ai/v0/evi/chat_groups';
+
+// Define the event structure based on actual API response
+interface ChatEvent {
+  id: string;
+  chatId: string;
+  timestamp: number;
+  role: 'USER' | 'SYSTEM' | 'ASSISTANT' | 'AGENT';
+  type: string;
+  messageText: string | null;
+  emotionFeatures: string | null;
+  metadata: string | null;
+}
 
 export async function GET(
   req: NextRequest,
@@ -19,43 +31,36 @@ export async function GET(
   }
 
   try {
-    // Construct the URL to fetch events for the specific chat group
-    // You might want to add pagination parameters like ?page_size=1000 if needed
-    const url = `${HUME_API_BASE_URL}/${groupId}/events`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-Hume-Api-Key': HUME_API_KEY,
-        'Content-Type': 'application/json',
-      },
-      cache: 'no-store' // Avoid caching historical events
+    console.log("Fetching events for chat group:", groupId);
+    const client = new HumeClient({ apiKey: HUME_API_KEY });
+    let currentPage = await client.empathicVoice.chatGroups.listChatGroupEvents(groupId, {
+      pageSize: 100,
+      pageNumber: 0,
+      ascendingOrder: true
     });
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error(`Hume API Error fetching events for group ${groupId}: ${response.status} ${response.statusText}`, errorBody);
-      return NextResponse.json({ message: `Failed to fetch events from Hume API: ${response.statusText}` }, { status: response.status });
+    console.log("First page raw events:", JSON.stringify(currentPage.eventsPage, null, 2));
+
+    const allEvents: ChatEvent[] = [];
+    allEvents.push(...(currentPage.eventsPage as unknown as ChatEvent[]));
+
+    while (currentPage.totalPages > currentPage.pageNumber + 1) {
+      currentPage = await client.empathicVoice.chatGroups.listChatGroupEvents(groupId, {
+        pageSize: 100,
+        pageNumber: currentPage.pageNumber + 1,
+        ascendingOrder: true
+      });
+      allEvents.push(...(currentPage.eventsPage as unknown as ChatEvent[]));
     }
 
-    const data = await response.json();
+    // Filter events to only include message events
+    const messageEvents = allEvents.filter(event => 
+      event.type === 'USER_MESSAGE' || event.type === 'AGENT_MESSAGE'
+    );
 
-    // Log the structure to confirm
-    console.log(`Hume API Response for group ${groupId} events:`, JSON.stringify(data, null, 2));
+    console.log("Filtered message events:", JSON.stringify(messageEvents, null, 2));
 
-    // Check if the data is an array directly, or nested (e.g., in a 'events_page' property)
-    let eventsArray = [];
-    if (Array.isArray(data)) {
-      eventsArray = data;
-    } else if (data && Array.isArray(data.events_page)) { // Adjust 'events_page' if needed based on logs
-      eventsArray = data.events_page;
-    } else {
-      // Log an error if the structure is unexpected
-      console.error(`Unexpected events response structure for group ${groupId}:`, data);
-      return NextResponse.json({ message: 'Unexpected response format from Hume API for events.' }, { status: 500 });
-    }
-
-    return NextResponse.json(eventsArray);
+    return NextResponse.json(messageEvents);
 
   } catch (error) {
     console.error(`Error fetching events for chat group ${groupId}:`, error);

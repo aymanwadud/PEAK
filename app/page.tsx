@@ -133,35 +133,48 @@ export default function Page() {
       }
       const events: HistoricalEvent[] = await response.json();
 
-      console.log("Fetched events:", events);
+      console.log("Raw events from API:", events);
+      console.log("Sample event structure:", events.length > 0 ? JSON.stringify(events[0], null, 2) : 'No events');
 
       const messageEvents = events.filter(
         (event) => event.type === 'USER_MESSAGE' || event.type === 'AGENT_MESSAGE'
       );
 
       console.log("Filtered message events:", messageEvents);
+      if (messageEvents.length > 0) {
+        console.log("First message event:", JSON.stringify(messageEvents[0], null, 2));
+      }
 
       const transcript = messageEvents
         .map((event) => {
           const role = event.role === 'USER' ? 'User' : 'Assistant';
-          const text = event.message_text || '(No text content)';
-          if (!event.message_text) {
-             console.warn("Event missing message_text:", event);
+          console.log('Processing event - role:', event.role, 'message:', event.messageText);
+          if (!event.messageText) {
+            console.log('Event missing messageText:', event);
+            return;
+          }
+          const text = event.messageText || '(No text content)';
+          if (!event.messageText) {
+             console.warn("Event missing messageText:", event);
           }
           return `${role}: ${text}`;
         })
         .join('\n');
 
+      console.log("Generated transcript:", transcript);
+
       const topEmotions = getTopEmotions(events);
       
       const emotionsPerMessage = messageEvents.map((event) => ({
         role: event.role,
-        text: event.message_text || '(No text content)',
-        emotions: event.role === 'USER' && event.emotion_features
-          ? getTopEmotionsForMessage(event.emotion_features)
+        text: event.messageText || '(No text content)',
+        emotions: event.role === 'USER' && event.emotionFeatures
+          ? getTopEmotionsForMessage(event.emotionFeatures)
           : null,
         timestamp: event.timestamp, // Use number directly without converting to string
       }));
+
+      console.log("Processed emotions per message:", emotionsPerMessage);
 
       setProcessedHistory({ transcript, topEmotions, emotionsPerMessage });
 
@@ -280,12 +293,12 @@ export default function Page() {
       return (
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header section - sticky */}
-          <div className="flex-none px-4 py-2 bg-background text-center"> {/* Added text-center */}
+          <div className="flex-none px-4 py-2 bg-background text-center border-b">
             <h2 className="text-xl font-semibold mb-2">Chat History</h2>
             <div className="mb-4">
               <h4 className="font-medium mb-1">Overall Top 3 User Emotions:</h4>
               {processedHistory.topEmotions.length > 0 ? (
-                <div className="flex flex-wrap gap-2 justify-center"> {/* Added justify-center */}
+                <div className="flex flex-wrap gap-2 justify-center">
                   {processedHistory.topEmotions.map((emo, index) => (
                     <span key={index} className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
                       {emo.name}: {emo.score.toFixed(3)}
@@ -299,7 +312,7 @@ export default function Page() {
           </div>
 
           {/* Messages container - scrollable */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <div className="space-y-6 p-4">
               {processedHistory.emotionsPerMessage.map((msg, index) => (
                 <div key={index} className={`flex ${msg.role === 'USER' ? 'justify-end' : 'justify-start'} relative`}>
@@ -387,10 +400,8 @@ export default function Page() {
           currentChatGroupId={selectedChatGroupId} 
           isOpen={isSidebarOpen}
         />
-        <div className="grow flex flex-col h-full overflow-hidden">
-          <div className="flex-1">
-            {renderContent()}
-          </div>
+        <div className="grow flex flex-col h-full">
+          {renderContent()}
         </div>
       </div>
     </div>
