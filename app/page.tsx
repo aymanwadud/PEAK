@@ -16,7 +16,7 @@ type EmotionScore = {
 
 type ProcessedHistory = {
   transcript: string;
-  topEmotions: EmotionScore[];
+  topEmotions: Partial<EmotionScores>;
   emotionsPerMessage: Array<{
     role: ReturnChatEventRole;  // Update to use the correct type
     text: string;
@@ -57,41 +57,53 @@ function getTopEmotionsForMessage(emotionFeatures: string, topN: number = 3): Em
 
 // Function to calculate top 3 emotions
 // Update getTopEmotions to return EmotionScore[]
-function getTopEmotions(chatEvents: HistoricalEvent[]): EmotionScore[] {
-    const userMessagesWithEmotions = chatEvents.filter(
-        (event): event is HistoricalEvent & { type: 'USER_MESSAGE'; emotion_features: string } =>
-            event.type === "USER_MESSAGE" &&
-            typeof event.emotion_features === 'string' &&
-            event.emotion_features.length > 0
-    );
+function getTopEmotions(chatEvents: ReturnChatEvent[]): Partial<EmotionScores> {
+  // Extract user messages that have emotion features
+  const userMessages = chatEvents.filter(
+    (event) => event.type === "USER_MESSAGE" && event.emotionFeatures
+  );
 
-    if (userMessagesWithEmotions.length === 0) {
-        return [];
+  if (userMessages.length === 0 || !userMessages[0].emotionFeatures) {
+    return {};
+  }
+
+  const totalMessages = userMessages.length;
+
+  // Infer emotion keys from the first user message
+  const firstMessageEmotions = JSON.parse(userMessages[0].emotionFeatures) as EmotionScores;
+  const emotionKeys = Object.keys(firstMessageEmotions) as (keyof EmotionScores)[];
+
+  // Initialize sums for all emotions to 0
+  const emotionSums: Record<keyof EmotionScores, number> = Object.fromEntries(
+    emotionKeys.map((key) => [key, 0])
+  ) as Record<keyof EmotionScores, number>;
+
+  // Accumulate emotion scores from each user message
+  for (const event of userMessages) {
+    if (!event.emotionFeatures) continue;
+    const emotions = JSON.parse(event.emotionFeatures) as EmotionScores;
+    for (const key of emotionKeys) {
+      emotionSums[key] += emotions[key];
     }
+  }
 
-    const emotionSums: Record<string, number> = {};
-    let totalMessages = 0;
+  // Compute average scores for each emotion
+  const averageEmotions = emotionKeys.map((key) => ({
+    emotion: key,
+    score: emotionSums[key] / totalMessages,
+  }));
 
-    for (const event of userMessagesWithEmotions) {
-        try {
-            const emotions = JSON.parse(event.emotion_features) as EmotionScores;
-            totalMessages++;
-            Object.entries(emotions).forEach(([name, score]) => {
-                emotionSums[name] = (emotionSums[name] || 0) + score;
-            });
-        } catch (error) {
-            console.error("Error parsing emotion_features:", event.emotion_features, error);
-            continue;
-        }
-    }
+  // Sort by average score (descending) and pick the top 3
+  averageEmotions.sort((a, b) => b.score - a.score);
+  const top3 = averageEmotions.slice(0, 3);
 
-    return Object.entries(emotionSums)
-        .map(([name, totalScore]) => ({
-            name,
-            score: totalScore / totalMessages
-        }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
+  // Build a Partial<EmotionScores> with only the top 3 emotions
+  const result: Partial<EmotionScores> = {};
+  for (const { emotion, score } of top3) {
+    result[emotion] = score;
+  }
+
+  return result;
 }
 
 export default function Page() {
@@ -132,10 +144,10 @@ export default function Page() {
         throw new Error(`Failed to fetch history: ${response.statusText}`);
       }
       const events: HistoricalEvent[] = await response.json();
-
-      console.log("Raw events from API:", events);
-      console.log("Sample event structure:", events.length > 0 ? JSON.stringify(events[0], null, 2) : 'No events');
-
+      
+      console.log("Fetched events:", events);
+      console.log("Events with emotions:", events.filter(e => e.type === "USER_MESSAGE" && e.emotionFeatures));
+      
       const messageEvents = events.filter(
         (event) => event.type === 'USER_MESSAGE' || event.type === 'AGENT_MESSAGE'
       );
@@ -293,20 +305,22 @@ export default function Page() {
       return (
         <div className="flex flex-col h-full overflow-hidden">
           {/* Header section - sticky */}
-          <div className="flex-none px-4 py-2 bg-background text-center border-b">
-            <h2 className="text-xl font-semibold mb-2">Chat History</h2>
-            <div className="mb-4">
-              <h4 className="font-medium mb-1">Overall Top 3 User Emotions:</h4>
-              {processedHistory.topEmotions.length > 0 ? (
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {processedHistory.topEmotions.map((emo, index) => (
-                    <span key={index} className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
-                      {emo.name}: {emo.score.toFixed(3)}
+          <div className="flex-none px-4 py-2 bg-background/50 text-center">
+            <div className="mb-2">
+              <h4 className="text-sm text-gray-500 font-normal mb-1">Overall Top 3 User Emotions</h4>
+              {processedHistory.topEmotions && Object.entries(processedHistory.topEmotions).length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {Object.entries(processedHistory.topEmotions).map(([emotion, score], index) => (
+                    <span 
+                      key={index} 
+                      className="bg-gray-50 dark:bg-gray-900/50 px-2 py-0.5 rounded text-xs text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-800"
+                    >
+                      {emotion}: {score.toFixed(3)}
                     </span>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No user emotion data found.</p>
+                <p className="text-xs text-gray-400">No emotion data available</p>
               )}
             </div>
           </div>
