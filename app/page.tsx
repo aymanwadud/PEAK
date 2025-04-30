@@ -279,14 +279,13 @@ export default function Page() {
       // ...rest of the processedHistory rendering code...
       return (
         <div className="flex flex-col h-full overflow-hidden">
-          {/* ...existing history display code... */}
           {/* Header section - sticky */}
-          <div className="flex-none px-4 py-2 bg-background">
+          <div className="flex-none px-4 py-2 bg-background text-center"> {/* Added text-center */}
             <h2 className="text-xl font-semibold mb-2">Chat History</h2>
             <div className="mb-4">
               <h4 className="font-medium mb-1">Overall Top 3 User Emotions:</h4>
               {processedHistory.topEmotions.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 justify-center"> {/* Added justify-center */}
                   {processedHistory.topEmotions.map((emo, index) => (
                     <span key={index} className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-sm">
                       {emo.name}: {emo.score.toFixed(3)}

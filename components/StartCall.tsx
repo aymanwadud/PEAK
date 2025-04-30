@@ -24,23 +24,11 @@ export default function StartCall({ isSidebarOpen }: StartCallProps) {
     };
   }, [status.value]);
 
-  const getTimeOfDay = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'this morning';
-    if (hour < 17) return 'this afternoon';
-    return 'tonight';
-  };
-
-  const getMessage = () => {
-    if (!sessionType) return `What's on your mind ${getTimeOfDay()}?`;
-    return `What's on your mind ${getTimeOfDay()}?`;
-  };
-
   return (
     <AnimatePresence>
       {status.value !== "connected" ? (
         <motion.div
-          className="fixed inset-0 p-4 flex flex-col items-center justify-center bg-background"
+          className="fixed inset-0 flex items-center justify-center bg-background"
           initial="initial"
           animate="enter"
           exit="exit"
@@ -69,9 +57,9 @@ export default function StartCall({ isSidebarOpen }: StartCallProps) {
             transition: "margin-left 0.2s ease-in-out",
           }}
         >
-          <div className="w-full max-w-md space-y-8 text-center">
+          <div className="flex flex-col items-center justify-center space-y-12 p-4">
             <h1 className="text-4xl font-bold tracking-tight whitespace-nowrap">
-              {getMessage()}
+              What's on your mind right now?
             </h1>
             <Button
               size="lg"

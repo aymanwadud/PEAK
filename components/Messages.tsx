@@ -30,11 +30,12 @@ const Messages = forwardRef<
   return (
     <motion.div
       layoutScroll
-      className="grow rounded-md overflow-auto p-4"
+      className="flex-1 h-full overflow-y-auto p-4 relative flex flex-col"
       ref={ref}
+      style={{ maxHeight: "calc(100vh - 200px)" }} // Add fixed max height
     >
       <motion.div
-        className="max-w-2xl mx-auto w-full flex flex-col gap-4 pb-24"
+        className="max-w-2xl mx-auto w-full flex flex-col gap-4 min-h-full"
       >
         {sessionType && (
           <div className="flex justify-center mb-4">

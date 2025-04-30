@@ -1,7 +1,7 @@
 // File: components/ChatHistorySidebar.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from './ui/button';
 import { History, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/utils';
@@ -35,8 +35,34 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
     today: true,
     yesterday: true,
     last7days: true,
-    last30days: true
+    last30days: true,
+    // Month sections will be added dynamically if needed
   });
+  const intervalRef = useRef<NodeJS.Timeout | null>(null); // Ref to hold the interval ID
+
+  // Define fetch function separately to be reusable
+  const fetchChatGroups = useCallback(async () => {
+    setIsLoading(true);
+    let currentError = null; // Local variable to track error during this fetch
+    try {
+      const res = await fetch('/api/chat-groups', { cache: 'no-store' });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to fetch history: ${res.statusText} - ${text}`);
+      }
+      const data: ChatGroupSummary[] = await res.json();
+      const sortedData = [...data].sort((a, b) =>
+        new Date(b.start_timestamp).getTime() - new Date(a.start_timestamp).getTime()
+      );
+      setChatGroups(sortedData);
+    } catch (err: any) {
+      console.error("Error fetching chat group history:", err); // Keep error logging
+      currentError = err.message || 'Could not load chat history.';
+    } finally {
+      setIsLoading(false);
+      setError(currentError);
+    }
+  }, [setIsLoading, setChatGroups, setError]);
 
   // Helper function to group chats by date periods
   const groupChatsByDate = (chats: ChatGroupSummary[]): GroupedChats => {
@@ -49,14 +75,11 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
     const last30days = new Date(today);
     last30days.setDate(last30days.getDate() - 30);
 
+    const initialGrouped: GroupedChats = { today: [], yesterday: [], last7days: [], last30days: [], byMonth: {} };
+
     return chats.reduce((acc: GroupedChats, chat) => {
       const chatDate = new Date(chat.start_timestamp);
       const chatDay = new Date(chatDate.getFullYear(), chatDate.getMonth(), chatDate.getDate());
-
-      // Initialize byMonth if not exists
-      if (!acc.byMonth) {
-        acc.byMonth = {};
-      }
 
       if (chatDay.getTime() === today.getTime()) {
         acc.today.push(chat);
@@ -66,8 +89,7 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
         acc.last7days.push(chat);
       } else if (chatDay >= last30days && chatDay < last7days) {
         acc.last30days.push(chat);
-      } else {
-        // Group by month for older chats
+      } else if (chatDay < last30days) { // Only group older than 30 days by month
         const monthKey = `${chatDate.getFullYear()}-${String(chatDate.getMonth() + 1).padStart(2, '0')}`;
         if (!acc.byMonth[monthKey]) {
           acc.byMonth[monthKey] = [];
@@ -76,14 +98,14 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
       }
 
       return acc;
-    }, { today: [], yesterday: [], last7days: [], last30days: [], byMonth: {} });
+    }, initialGrouped);
   };
 
   // Helper function to format the time
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString(undefined, { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
       minute: '2-digit'
     });
   };
@@ -91,8 +113,8 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
   // Helper function to format the date
   const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString(undefined, { 
-      month: 'short', 
+    return date.toLocaleDateString(undefined, {
+      month: 'short',
       day: 'numeric',
       year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
     });
@@ -102,8 +124,8 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
   const formatMonthTitle = (monthKey: string) => {
     const [year, month] = monthKey.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString(undefined, { 
-      month: 'long', 
+    return date.toLocaleDateString(undefined, {
+      month: 'long',
       year: 'numeric'
     });
   };
@@ -111,47 +133,45 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section] // Toggle the specific section
     }));
   };
 
+  // Effect for polling
   useEffect(() => {
-    if (isOpen && chatGroups.length === 0 && !isLoading) {
-      setIsLoading(true);
-      setError(null);
-      fetch('/api/chat-groups')
-        .then(res => {
-          if (!res.ok) {
-            return res.text().then(text => {
-              throw new Error(`Failed to fetch history: ${res.statusText} - ${text}`);
-            });
-          }
-          return res.json();
-        })
-        .then((data: ChatGroupSummary[]) => {
-          // Sort chats by timestamp in descending order (newest first)
-          const sortedData = [...data].sort((a, b) => 
-            new Date(b.start_timestamp).getTime() - new Date(a.start_timestamp).getTime()
-          );
-          setChatGroups(sortedData);
-        })
-        .catch(err => {
-          console.error("Error fetching chat group history:", err);
-          setError(err.message || 'Could not load chat history.');
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+    const clearPollingInterval = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+
+    if (isOpen) {
+      fetchChatGroups(); // Fetch immediately
+
+      clearPollingInterval(); // Clear previous interval before setting a new one
+
+      intervalRef.current = setInterval(() => {
+        fetchChatGroups();
+      }, 20000); // 20 seconds
+    } else {
+      clearPollingInterval(); // Clear interval if sidebar is closed
     }
-  }, [isOpen, chatGroups.length, isLoading]);
+
+    // Cleanup function: Clear interval on unmount or when dependencies change
+    return () => {
+      clearPollingInterval();
+    };
+  }, [isOpen, fetchChatGroups]);
 
   const handleSelectChatGroup = (groupId: string) => {
     onSelectChatGroup(groupId);
   };
 
-  // Group the chats by date
+  // Group the chats by date - calculate here before render functions use it
   const groupedChats = groupChatsByDate(chatGroups);
 
+  // Render function for a list of chats within a section
   const renderChats = (chats: ChatGroupSummary[], showDate: boolean = false) => {
     return (
       <ul className="mt-1 space-y-1">
@@ -163,7 +183,7 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
               onClick={() => handleSelectChatGroup(group.id)}
             >
               <span className="truncate">
-                {showDate 
+                {showDate
                   ? `${formatDate(group.start_timestamp)} at ${formatTime(group.start_timestamp)}`
                   : formatTime(group.start_timestamp)
                 }
@@ -175,42 +195,45 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
     );
   };
 
-  const renderSection = (title: string, chats: ChatGroupSummary[], section: string, showDate: boolean = false) => {
+  // Render function for a collapsible date section
+  const renderSection = (title: string, chats: ChatGroupSummary[], sectionKey: string, showDate: boolean = false) => {
     if (!chats?.length) return null;
+
+    // Ensure section state exists, default to true if not set
+    const isExpanded = expandedSections[sectionKey] !== undefined ? expandedSections[sectionKey] : true;
 
     return (
       <div className="mb-4">
         <Button
           variant="ghost"
           className="w-full justify-between px-2 py-1 h-auto font-semibold text-sm"
-          onClick={() => toggleSection(section)}
+          onClick={() => toggleSection(sectionKey)}
         >
           <span>{title}</span>
-          {expandedSections[section] ? (
+          {isExpanded ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
             <ChevronRight className="h-4 w-4" />
           )}
         </Button>
-        {expandedSections[section] && renderChats(chats, showDate)}
+        {isExpanded && renderChats(chats, showDate)}
       </div>
     );
   };
 
+  // Render function for the monthly sections
   const renderMonthSections = () => {
     if (!groupedChats.byMonth) return null;
 
     return Object.entries(groupedChats.byMonth)
-      .sort(([a], [b]) => b.localeCompare(a)) // Sort months in descending order
+      .sort(([a], [b]) => b.localeCompare(a)) // Sort months in descending order (newest first)
       .map(([monthKey, chats]) => {
         const sectionKey = `month-${monthKey}`;
-        if (!expandedSections.hasOwnProperty(sectionKey)) {
-          setExpandedSections(prev => ({ ...prev, [sectionKey]: true }));
-        }
         return renderSection(formatMonthTitle(monthKey), chats, sectionKey, true);
       });
   };
 
+  // Main component render
   return (
     <div
       className={cn(
@@ -222,12 +245,12 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
     >
       {isOpen && (
         <div className="h-full flex flex-col">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
+          <h2 className="text-lg font-semibold mb-4 flex items-center justify-center"> {/* Added justify-center */}
             <History className="mr-2 h-5 w-5" /> Chat History
           </h2>
 
-          <div className="flex-grow overflow-y-auto">
-            {isLoading && (
+          <div className="flex-grow overflow-y-auto pr-1"> {/* Added pr-1 for scrollbar */}
+            {isLoading && chatGroups.length === 0 && ( // Show loader only on initial load
               <div className="flex justify-center items-center p-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
@@ -238,7 +261,7 @@ export default function ChatHistorySidebar({ isOpen, onSelectChatGroup, currentC
             {!isLoading && !error && chatGroups.length === 0 && (
               <p className="text-muted-foreground text-sm px-2">No chat history found.</p>
             )}
-            {!isLoading && !error && chatGroups.length > 0 && (
+            {chatGroups.length > 0 && (
               <div>
                 {renderSection('Today', groupedChats.today, 'today')}
                 {renderSection('Yesterday', groupedChats.yesterday, 'yesterday')}
