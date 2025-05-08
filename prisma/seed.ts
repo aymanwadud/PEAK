@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, EmotionScoreType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -9,18 +9,14 @@ async function main() {
       date: new Date('2025-04-28T16:00:00Z'),
       sport: 'tennis',
       outcome: 'win',
-      preSessionEmotions: {
+      emotionScores: {
         create: [
-          { name: 'Confidence', score: 0.75 },
-          { name: 'Focus', score: 0.82 },
-          { name: 'Anxiety', score: 0.45 }
-        ]
-      },
-      postSessionEmotions: {
-        create: [
-          { name: 'Confidence', score: 0.85 },
-          { name: 'Focus', score: 0.88 },
-          { name: 'Anxiety', score: 0.32 }
+          { name: 'Confidence', score: 0.75, type: EmotionScoreType.PRE },
+          { name: 'Focus', score: 0.82, type: EmotionScoreType.PRE },
+          { name: 'Anxiety', score: 0.45, type: EmotionScoreType.PRE },
+          { name: 'Confidence', score: 0.85, type: EmotionScoreType.POST },
+          { name: 'Focus', score: 0.88, type: EmotionScoreType.POST },
+          { name: 'Anxiety', score: 0.32, type: EmotionScoreType.POST }
         ]
       },
       performanceMetrics: {
@@ -48,18 +44,14 @@ async function main() {
       date: new Date('2025-04-29T16:00:00Z'),
       sport: 'baseball-pitcher',
       outcome: 'loss',
-      preSessionEmotions: {
+      emotionScores: {
         create: [
-          { name: 'Confidence', score: 0.72 },
-          { name: 'Focus', score: 0.68 },
-          { name: 'Composure', score: 0.65 }
-        ]
-      },
-      postSessionEmotions: {
-        create: [
-          { name: 'Confidence', score: 0.62 },
-          { name: 'Focus', score: 0.71 },
-          { name: 'Composure', score: 0.58 }
+          { name: 'Confidence', score: 0.72, type: EmotionScoreType.PRE },
+          { name: 'Focus', score: 0.68, type: EmotionScoreType.PRE },
+          { name: 'Composure', score: 0.65, type: EmotionScoreType.PRE },
+          { name: 'Confidence', score: 0.62, type: EmotionScoreType.POST },
+          { name: 'Focus', score: 0.71, type: EmotionScoreType.POST },
+          { name: 'Composure', score: 0.58, type: EmotionScoreType.POST }
         ]
       },
       performanceMetrics: {
