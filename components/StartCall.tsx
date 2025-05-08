@@ -4,7 +4,7 @@ import { useVoice } from "@humeai/voice-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { Phone } from "lucide-react";
-import { useGameSession } from "@/context/GameSessionContext";
+import { useSession } from "@/context/SessionContext";
 import { useEffect } from "react";
 
 interface StartCallProps {
@@ -13,7 +13,7 @@ interface StartCallProps {
 
 export default function StartCall({ isSidebarOpen }: StartCallProps) {
   const { status, connect } = useVoice();
-  const { gameId, sessionType } = useGameSession();
+  const { sessionId, sessionType } = useSession();
 
   useEffect(() => {
     // Clean up voice connection when component unmounts or session changes

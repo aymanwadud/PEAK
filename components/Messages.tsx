@@ -4,25 +4,25 @@ import { useVoice } from "@humeai/voice-react";
 import Expressions from "./Expressions";
 import { AnimatePresence, motion } from "framer-motion";
 import { ComponentRef, forwardRef } from "react";
-import { useGameSession } from "@/context/GameSessionContext";
+import { useSession } from "@/context/SessionContext";
 
 const Messages = forwardRef<
   ComponentRef<typeof motion.div>,
   Record<never, never>
 >(function Messages(_, ref) {
   const { messages } = useVoice();
-  const { sessionType } = useGameSession();
+  const { sessionType } = useSession();
 
   const getSessionBadge = () => {
     if (!sessionType) return null;
-    const isPreGame = sessionType === 'pre-game';
+    const isPreSession = sessionType === 'pre-session';
     
     return (
       <div className={cn(
         "px-3 py-1 rounded-full text-xs font-medium inline-flex items-center",
-        isPreGame ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
+        isPreSession ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"
       )}>
-        {isPreGame ? "Pre-Game Session" : "Post-Game Session"}
+        {isPreSession ? "Pre-Session" : "Post-Session"}
       </div>
     );
   };

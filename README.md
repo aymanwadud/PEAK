@@ -1,19 +1,19 @@
 <div align="center">
   <img src="https://storage.googleapis.com/hume-public-logos/hume/hume-banner.png">
-  <h1>PeakForm | Athletic Performance Analytics</h1>
+  <h1>PeakForm | Athletic Analytics</h1>
 </div>
 
 ![preview.png](preview.png)
 
 ## Overview
 
-PeakForm is an advanced athletic performance tracking platform that combines Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) with performance analytics to help athletes optimize their mental game and achieve peak performance. Built with Next.js App Router, it includes both real-time emotional state tracking and comprehensive performance analytics.
+PeakForm is an advanced athletic performance tracking platform that combines Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) with analytics to help athletes optimize their mental game and achieve peak performance. Built with Next.js App Router, it includes both real-time emotional state tracking and comprehensive analytics.
 
 ### Key Features
 
 - 🎯 Sport-specific performance metrics
 - 🎨 Real-time emotional state tracking
-- 📊 Performance analytics with emotion correlation
+- 📊 Analytics with emotion correlation
 - 💫 Post-game recovery analysis
 - 🔍 Historical performance tracking
 - 📈 Emotional trend analysis

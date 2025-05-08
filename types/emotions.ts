@@ -3,18 +3,18 @@ export interface EmotionScore {
   score: number;
 }
 
-export interface GameEmotionData {
+export interface SessionEmotionData {
   id: string;
   date: string;
-  preGame: EmotionScore[];
-  postGame: EmotionScore[];
+  preSession: EmotionScore[];
+  postSession: EmotionScore[];
   performanceMetrics: {
-    metric: number;
     name: string;
+    metric: number;
   }[];
   outcome: 'win' | 'loss';
   recoveryData: {
-    timeAfterGame: number;
+    timeAfterSession: number;
     emotionScore: number;
     baseline: number;
   }[];

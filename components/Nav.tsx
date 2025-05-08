@@ -43,17 +43,19 @@ export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => {
             className="mr-1"
           >
             {isSidebarOpen ? (
-              <PanelLeftClose className="h-5 w-5" />
+              <PanelLeftClose className="h-6 w-8" />
             ) : (
-              <PanelLeftOpen className="h-5 w-5" />
+              <PanelLeftOpen className="h-6 w-8" />
             )}
           </Button>
         )}
         {onNewChat && (
           <Button onClick={onNewChat} variant="ghost" size="icon">
-            <PlusCircle className="h-5 w-5" />
+            <PlusCircle className="h-6 w-8" />
           </Button>
         )}
+        {/* Add the app title here */}
+        <span className="font-bold text-2xl ml-4">Peak</span>
       </div>
 
       {/* Center section */}
@@ -65,8 +67,8 @@ export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => {
             className="flex items-center gap-2 min-w-[180px] justify-center"
             size="sm"
           >
-            <BarChart className="h-4 w-4" />
-            <span>Performance Analytics</span>
+            <BarChart className="h-6 w-6" />
+            <span className=" text-lg">Analytics</span>
           </Button>
           <Button
             onClick={handleSessionsClick}
@@ -74,8 +76,8 @@ export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => {
             className="flex items-center gap-2 min-w-[180px] justify-center"
             size="sm"
           >
-            <GamepadIcon className="h-4 w-4" />
-            <span>Game Sessions</span>
+            <GamepadIcon className="h-6 w-6" />
+            <span className=" text-lg">Sessions</span>
           </Button>
         </div>
       </div>

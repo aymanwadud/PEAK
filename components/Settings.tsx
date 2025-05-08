@@ -11,7 +11,7 @@ import {
 } from "./ui/dialog"
 import { useState, useLayoutEffect } from "react"
 import SportSelector from "./SportSelector"
-import { useSport } from "@/context/SportContext"
+import { useSport } from "@/context/ActivityContext"
 
 export function Settings() {
   const [isDarkMode, setIsDarkMode] = useState(false)

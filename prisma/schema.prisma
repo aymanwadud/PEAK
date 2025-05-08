@@ -1,0 +1,72 @@
+// This is your Prisma schema file
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // Use the suggested output path
+  output   = "../node_modules/.prisma/client"
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  date      DateTime
+  outcome   String   // 'win' | 'loss'
+  sport     String   // 'tennis' | 'baseball-pitcher' | 'baseball-batter'
+
+  // Single relation for all emotion scores
+  emotionScores     EmotionScore[]
+
+  // Performance metrics for the session
+  performanceMetrics PerformanceMetric[]
+
+  // Recovery tracking after the session
+  recoveryData      RecoveryPoint[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Add an enum for the type
+enum EmotionScoreType {
+  PRE
+  POST
+}
+
+model EmotionScore {
+  id      String @id @default(cuid())
+  name    String // e.g., 'Confidence', 'Anxiety', 'Focus'
+  score   Float  // 0.0 to 1.0
+  type    EmotionScoreType // Add type field
+
+  // Single relation back to Session
+  session    Session   @relation(fields: [sessionId], references: [id])
+  sessionId  String
+
+  createdAt DateTime @default(now())
+}
+
+model PerformanceMetric {
+  id      String @id @default(cuid())
+  name    String // e.g., 'First Serve %', 'Winners'
+  value   Float
+  
+  session    Session   @relation(fields: [sessionId], references: [id])
+  sessionId  String
+
+  createdAt DateTime @default(now())
+}
+
+model RecoveryPoint {
+  id              String   @id @default(cuid())
+  timeAfterSession Int     // Hours after session
+  emotionScore    Float    // 0.0 to 1.0
+  baseline        Float    // Baseline emotion score
+  
+  session    Session   @relation(fields: [sessionId], references: [id])
+  sessionId  String
+
+  createdAt DateTime @default(now())
+}

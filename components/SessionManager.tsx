@@ -2,100 +2,100 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "./ui/button"
-import { GameSchedule, GameSession, GameMetrics } from "@/types/game"
+import { Schedule, SessionType, Metrics } from "@/types/game"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
 import { format, isWithinInterval, subHours as subtractHours, addHours } from "date-fns"
 import { Trophy, Timer } from "lucide-react"
 import { Sport, SPORT_CONFIGS } from "./SportSelector"
-import { useSport } from "@/context/SportContext"
-import { useGameSession } from "@/context/GameSessionContext"
+import { useSport } from "@/context/ActivityContext"
+import { useSession } from "@/context/SessionContext"
 
-interface GameSessionManagerProps {
-  schedules: GameSchedule[]
-  onSessionStart: (gameId: string | null, sessionType: GameSession) => void
-  onGameComplete: (metrics: GameMetrics) => void
+interface SessionManagerProps {
+  schedules: Schedule[]
+  onSessionStart: (sessionId: string | null, type: SessionType) => void
+  onComplete: (metrics: Metrics) => void
 }
 
-export function GameSessionManager({ 
+export function SessionManager({ 
   schedules, 
   onSessionStart,
-  onGameComplete 
-}: GameSessionManagerProps) {
-  const [activeGame, setActiveGame] = useState<GameSchedule | null>(null)
+  onComplete 
+}: SessionManagerProps) {
+  const [activeSession, setActiveSession] = useState<Schedule | null>(null)
   const [showMetricsDialog, setShowMetricsDialog] = useState(false)
   const [metrics, setMetrics] = useState<Record<string, number>>({})
   const [outcome, setOutcome] = useState<'win' | 'loss' | null>(null)
   const { selectedSport } = useSport()
-  const { gameId, sessionType, setGameSession } = useGameSession()
+  const { sessionId, sessionType, setSession } = useSession()
   const sportConfig = SPORT_CONFIGS[selectedSport]
 
   useEffect(() => {
-    // Find current game based on schedule
+    // Find current session based on schedule
     const now = new Date()
-    const currentGame = schedules.find(game => {
-      const gameTime = new Date(`${game.date}T${game.time}`)
+    const currentSession = schedules.find(session => {
+      const sessionTime = new Date(`${session.date}T${session.time}`)
       return isWithinInterval(now, {
-        start: subtractHours(gameTime, 2), // 2 hours before game
-        end: addHours(gameTime, 4) // 4 hours after game
+        start: subtractHours(sessionTime, 2), // 2 hours before
+        end: addHours(sessionTime, 4) // 4 hours after
       })
     })
 
-    if (currentGame) {
-      setActiveGame(currentGame)
-      const gameTime = new Date(`${currentGame.date}T${currentGame.time}`)
-      // Determine session type based on game time
-      if (now < gameTime) {
-        setGameSession(currentGame.id, 'pre-game')
+    if (currentSession) {
+      setActiveSession(currentSession)
+      const sessionTime = new Date(`${currentSession.date}T${currentSession.time}`)
+      // Determine session type based on time
+      if (now < sessionTime) {
+        setSession(currentSession.id, 'pre-session')
       } else {
-        setGameSession(currentGame.id, 'post-game')
+        setSession(currentSession.id, 'post-session')
       }
     } else {
-      setActiveGame(null)
-      if (!gameId) {
-        setGameSession(null, null)
+      setActiveSession(null)
+      if (!sessionId) {
+        setSession(null, null)
       }
     }
-  }, [schedules, setGameSession, gameId])
+  }, [schedules, setSession, sessionId])
 
-  const handleGameComplete = (e: React.FormEvent) => {
+  const handleComplete = (e: React.FormEvent) => {
     e.preventDefault()
-    if (activeGame && outcome) {
-      const gameMetrics: GameMetrics = {
+    if (activeSession && outcome) {
+      const sessionMetrics: Metrics = {
         id: crypto.randomUUID(),
-        gameId: activeGame.id,
+        sessionId: activeSession.id,
         metrics: Object.entries(metrics).map(([name, value]) => ({
           name,
           value
         })),
         outcome
       }
-      onGameComplete(gameMetrics)
+      onComplete(sessionMetrics)
       setShowMetricsDialog(false)
-      // Start post-game session automatically
-      setGameSession(activeGame.id, 'post-game')
+      // Start post-session automatically
+      setSession(activeSession.id, 'post-session')
     }
   }
 
-  if (!activeGame) {
+  if (!activeSession) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Game Session</h2>
+        <h2 className="text-lg font-semibold">Session</h2>
         <div className="flex flex-col items-center justify-center p-8 border rounded-lg bg-card space-y-4">
           <p className="text-center text-muted-foreground">
-            No active games found. Add a game to your schedule or start a manual session.
+            No active sessions found. Add a session to your schedule or start a manual session.
           </p>
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setGameSession(null, 'pre-game')}
+              onClick={() => setSession(null, 'pre-session')}
             >
-              Start Pre-Game Session
+              Start Pre-Session
             </Button>
             <Button
               variant="outline"
-              onClick={() => setGameSession(null, 'post-game')}
+              onClick={() => setSession(null, 'post-session')}
             >
-              Start Post-Game Session
+              Start Post-Session
             </Button>
           </div>
         </div>
@@ -103,65 +103,65 @@ export function GameSessionManager({
     )
   }
 
-  const gameTime = new Date(`${activeGame.date}T${activeGame.time}`)
-  const isPreGame = sessionType === 'pre-game'
-  const isPostGame = sessionType === 'post-game'
+  const sessionTime = new Date(`${activeSession.date}T${activeSession.time}`)
+  const isPreSession = sessionType === 'pre-session'
+  const isPostSession = sessionType === 'post-session'
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Active Game Session</h2>
+      <h2 className="text-lg font-semibold">Active Session</h2>
       <div className="p-4 border rounded-lg bg-card space-y-4">
         <div className="flex justify-between items-start">
           <div>
-            <p className="font-medium">{format(gameTime, "PPp")}</p>
-            {activeGame.opponent && (
-              <p className="text-sm text-muted-foreground">vs {activeGame.opponent}</p>
+            <p className="font-medium">{format(sessionTime, "PPp")}</p>
+            {activeSession.opponent && (
+              <p className="text-sm text-muted-foreground">vs {activeSession.opponent}</p>
             )}
           </div>
           <div className="space-x-2">
-            {!isPreGame && (
+            {!isPreSession && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setGameSession(activeGame.id, 'pre-game')}
+                onClick={() => setSession(activeSession.id, 'pre-session')}
               >
                 <Timer className="w-4 h-4 mr-1" />
-                Pre-Game
+                Pre-Session
               </Button>
             )}
-            {!isPostGame && (
+            {!isPostSession && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowMetricsDialog(true)}
               >
                 <Trophy className="w-4 h-4 mr-1" />
-                Complete Game
+                Complete
               </Button>
             )}
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {isPreGame ? (
+          {isPreSession ? (
             <>
               <Button 
-                onClick={() => setGameSession(activeGame.id, 'pre-game')}
+                onClick={() => setSession(activeSession.id, 'pre-session')}
                 className="w-full"
               >
-                Start Pre-Game Session
+                Start Pre-Session
               </Button>
               <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="w-full">
                     <Trophy className="w-4 h-4 mr-2" />
-                    Enter Game Results
+                    Enter Results
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Game Results</DialogTitle>
+                    <DialogTitle>Session Results</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleGameComplete} className="space-y-4">
+                  <form onSubmit={handleComplete} className="space-y-4">
                     <div className="space-y-4">
                       <div>
                         <label className="text-sm font-medium">Outcome</label>
@@ -200,7 +200,7 @@ export function GameSessionManager({
                       ))}
                     </div>
                     <div className="flex justify-end">
-                      <Button type="submit">Save & Start Post-Game</Button>
+                      <Button type="submit">Save & Start Post-Session</Button>
                     </div>
                   </form>
                 </DialogContent>
@@ -208,10 +208,10 @@ export function GameSessionManager({
             </>
           ) : (
             <Button 
-              onClick={() => setGameSession(activeGame.id, 'post-game')}
+              onClick={() => setSession(activeSession.id, 'post-session')}
               className="w-full"
             >
-              Start Post-Game Session
+              Start Post-Session
             </Button>
           )}
         </div>

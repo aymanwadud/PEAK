@@ -4,27 +4,27 @@ import ReactECharts from 'echarts-for-react';
 import { EmotionScore } from '@/types/emotions';
 
 interface EmotionRadarChartProps {
-  preGameEmotions: EmotionScore[];
-  postGameEmotions: EmotionScore[];
-  gameTitle: string;
+  preSessionEmotions: EmotionScore[];
+  postSessionEmotions: EmotionScore[];
+  title: string;
 }
 
-export default function EmotionRadarChart({ preGameEmotions, postGameEmotions, gameTitle }: EmotionRadarChartProps) {
+export default function EmotionRadarChart({ preSessionEmotions, postSessionEmotions, title }: EmotionRadarChartProps) {
   // Use Array.from to handle Set iteration
   const allEmotions = Array.from(new Set(
-    [...preGameEmotions, ...postGameEmotions].map(e => e.name)
+    [...preSessionEmotions, ...postSessionEmotions].map(e => e.name)
   ));
   
   const option = {
     title: {
-      text: `Emotional State Analysis: ${gameTitle}`,
+      text: `Emotional State Analysis: ${title}`,
       left: 'center'
     },
     tooltip: {
       trigger: 'item'
     },
     legend: {
-      data: ['Pre-Game', 'Post-Game'],
+      data: ['Pre-Session', 'Post-Session'],
       bottom: 0
     },
     radar: {
@@ -38,20 +38,20 @@ export default function EmotionRadarChart({ preGameEmotions, postGameEmotions, g
         data: [
           {
             value: allEmotions.map(emotion => {
-              const found = preGameEmotions.find(e => e.name === emotion);
+              const found = preSessionEmotions.find(e => e.name === emotion);
               return found ? found.score : 0;
             }),
-            name: 'Pre-Game',
+            name: 'Pre-Session',
             areaStyle: {
               opacity: 0.3
             }
           },
           {
             value: allEmotions.map(emotion => {
-              const found = postGameEmotions.find(e => e.name === emotion);
+              const found = postSessionEmotions.find(e => e.name === emotion);
               return found ? found.score : 0;
             }),
-            name: 'Post-Game',
+            name: 'Post-Session',
             areaStyle: {
               opacity: 0.3
             }

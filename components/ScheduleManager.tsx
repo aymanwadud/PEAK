@@ -3,32 +3,32 @@
 import { useState } from "react"
 import { Button } from "./ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { GameSchedule } from "@/types/game"
+import { Schedule } from "@/types/game"
 import { format as formatDate } from "date-fns"
 import { Calendar, Clock, Plus } from "lucide-react"
 
-interface GameScheduleManagerProps {
-  onScheduleUpdate: (schedule: GameSchedule[]) => void
-  schedules: GameSchedule[]
+interface ScheduleManagerProps {
+  onScheduleUpdate: (schedule: Schedule[]) => void
+  schedules: Schedule[]
 }
 
-export function GameScheduleManager({ onScheduleUpdate, schedules }: GameScheduleManagerProps) {
+export function ScheduleManager({ onScheduleUpdate, schedules }: ScheduleManagerProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [newGame, setNewGame] = useState<Partial<GameSchedule>>({})
+  const [newSession, setNewSession] = useState<Partial<Schedule>>({})
 
-  const handleAddGame = (e: React.FormEvent) => {
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newGame.date && newGame.time) {
-      const game: GameSchedule = {
+    if (newSession.date && newSession.time) {
+      const session: Schedule = {
         id: crypto.randomUUID(),
-        date: newGame.date,
-        time: newGame.time,
-        opponent: newGame.opponent,
-        venue: newGame.venue,
-        notes: newGame.notes
+        date: newSession.date,
+        time: newSession.time,
+        opponent: newSession.opponent,
+        venue: newSession.venue,
+        notes: newSession.notes
       }
-      onScheduleUpdate([...schedules, game])
-      setNewGame({})
+      onScheduleUpdate([...schedules, session])
+      setNewSession({})
       setIsDialogOpen(false)
     }
   }
@@ -36,19 +36,19 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Game Schedule</h2>
+        <h2 className="text-lg font-semibold">Schedule</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
               <Plus className="w-4 h-4 mr-1" />
-              Add Game
+              Add Session
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Game</DialogTitle>
+              <DialogTitle>Add New Session</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleAddGame} className="space-y-4">
+            <form onSubmit={handleAdd} className="space-y-4">
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Date</label>
                 <div className="relative">
@@ -57,8 +57,8 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
                     type="date"
                     required
                     className="pl-8 w-full rounded-md border border-input bg-background px-3 py-2"
-                    value={newGame.date || ''}
-                    onChange={(e) => setNewGame({ ...newGame, date: e.target.value })}
+                    value={newSession.date || ''}
+                    onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
                   />
                 </div>
               </div>
@@ -70,8 +70,8 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
                     type="time"
                     required
                     className="pl-8 w-full rounded-md border border-input bg-background px-3 py-2"
-                    value={newGame.time || ''}
-                    onChange={(e) => setNewGame({ ...newGame, time: e.target.value })}
+                    value={newSession.time || ''}
+                    onChange={(e) => setNewSession({ ...newSession, time: e.target.value })}
                   />
                 </div>
               </div>
@@ -80,8 +80,8 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
                 <input
                   type="text"
                   className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={newGame.opponent || ''}
-                  onChange={(e) => setNewGame({ ...newGame, opponent: e.target.value })}
+                  value={newSession.opponent || ''}
+                  onChange={(e) => setNewSession({ ...newSession, opponent: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -89,8 +89,8 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
                 <input
                   type="text"
                   className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={newGame.venue || ''}
-                  onChange={(e) => setNewGame({ ...newGame, venue: e.target.value })}
+                  value={newSession.venue || ''}
+                  onChange={(e) => setNewSession({ ...newSession, venue: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
@@ -98,12 +98,12 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
                 <textarea
                   className="w-full rounded-md border border-input bg-background px-3 py-2"
                   rows={3}
-                  value={newGame.notes || ''}
-                  onChange={(e) => setNewGame({ ...newGame, notes: e.target.value })}
+                  value={newSession.notes || ''}
+                  onChange={(e) => setNewSession({ ...newSession, notes: e.target.value })}
                 />
               </div>
               <div className="flex justify-end">
-                <Button type="submit">Add Game</Button>
+                <Button type="submit">Add Session</Button>
               </div>
             </form>
           </DialogContent>
@@ -112,38 +112,38 @@ export function GameScheduleManager({ onScheduleUpdate, schedules }: GameSchedul
       
       <div className="space-y-2">
         {schedules.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No games scheduled. Add your upcoming games to enable automatic session tracking.</p>
+          <p className="text-sm text-muted-foreground">No sessions scheduled. Add your upcoming sessions to enable automatic tracking.</p>
         ) : (
-          schedules.map((game) => (
+          schedules.map((session) => (
             <div
-              key={game.id}
+              key={session.id}
               className="p-4 rounded-lg border bg-card"
             >
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-medium">
-                    {formatDate(new Date(`${game.date}T${game.time}`), "PPp")}
+                    {formatDate(new Date(`${session.date}T${session.time}`), "PPp")}
                   </p>
-                  {game.opponent && (
-                    <p className="text-sm text-muted-foreground">vs {game.opponent}</p>
+                  {session.opponent && (
+                    <p className="text-sm text-muted-foreground">vs {session.opponent}</p>
                   )}
-                  {game.venue && (
-                    <p className="text-sm text-muted-foreground">{game.venue}</p>
+                  {session.venue && (
+                    <p className="text-sm text-muted-foreground">{session.venue}</p>
                   )}
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    onScheduleUpdate(schedules.filter(s => s.id !== game.id))
+                    onScheduleUpdate(schedules.filter(s => s.id !== session.id))
                   }}
                 >
-                  <span className="sr-only">Remove game</span>
+                  <span className="sr-only">Remove session</span>
                   ×
                 </Button>
               </div>
-              {game.notes && (
-                <p className="mt-2 text-sm text-muted-foreground">{game.notes}</p>
+              {session.notes && (
+                <p className="mt-2 text-sm text-muted-foreground">{session.notes}</p>
               )}
             </div>
           ))

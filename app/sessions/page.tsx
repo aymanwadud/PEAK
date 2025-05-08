@@ -1,43 +1,43 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { GameScheduleManager } from "@/components/GameScheduleManager";
-import { GameSessionManager } from "@/components/GameSessionManager";
-import { GameSchedule, GameMetrics, GameSession } from "@/types/game";
-import { useGameSession } from "@/context/GameSessionContext";
+import { ScheduleManager } from "@/components/ScheduleManager";
+import { SessionManager } from "@/components/SessionManager";
+import { Schedule, Metrics, SessionType } from "@/types/game";
+import { useSession } from "@/context/SessionContext";
 import { Nav } from "@/components/Nav";
 import ChatHistorySidebar from "@/components/ChatHistorySidebar";
 import { useRouter } from "next/navigation";
 
-export default function GameSessionsPage() {
-  const [schedules, setSchedules] = useState<GameSchedule[]>([]);
-  const { setGameSession } = useGameSession();
+export default function SessionsPage() {
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const { setSession } = useSession();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedChatGroupId, setSelectedChatGroupId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     // Load saved schedules from localStorage
-    const savedSchedules = localStorage.getItem('gameSchedules');
+    const savedSchedules = localStorage.getItem('schedules');
     if (savedSchedules) {
       setSchedules(JSON.parse(savedSchedules));
     }
   }, []);
 
-  const handleScheduleUpdate = (newSchedules: GameSchedule[]) => {
+  const handleScheduleUpdate = (newSchedules: Schedule[]) => {
     setSchedules(newSchedules);
-    localStorage.setItem('gameSchedules', JSON.stringify(newSchedules));
+    localStorage.setItem('schedules', JSON.stringify(newSchedules));
   };
 
-  const handleSessionStart = (gameId: string | null, sessionType: GameSession) => {
-    setGameSession(gameId, sessionType);
+  const handleSessionStart = (sessionId: string | null, sessionType: SessionType) => {
+    setSession(sessionId, sessionType);
   };
 
-  const handleGameComplete = (metrics: GameMetrics) => {
-    // Save game metrics to localStorage for now
-    const savedMetrics = JSON.parse(localStorage.getItem('gameMetrics') || '[]');
+  const handleComplete = (metrics: Metrics) => {
+    // Save metrics to localStorage for now
+    const savedMetrics = JSON.parse(localStorage.getItem('sessionMetrics') || '[]');
     savedMetrics.push(metrics);
-    localStorage.setItem('gameMetrics', JSON.stringify(savedMetrics));
+    localStorage.setItem('sessionMetrics', JSON.stringify(savedMetrics));
   };
 
   const toggleSidebar = () => {
@@ -69,16 +69,16 @@ export default function GameSessionsPage() {
           <div className="max-w-4xl mx-auto p-6">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Game Sessions</h1>
+                <h1 className="text-2xl font-bold">Sessions</h1>
               </div>
-              <GameScheduleManager
+              <ScheduleManager
                 schedules={schedules}
                 onScheduleUpdate={handleScheduleUpdate}
               />
-              <GameSessionManager
+              <SessionManager
                 schedules={schedules}
                 onSessionStart={handleSessionStart}
-                onGameComplete={handleGameComplete}
+                onComplete={handleComplete}
               />
             </div>
           </div>

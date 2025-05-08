@@ -3,7 +3,7 @@
 import ReactECharts from 'echarts-for-react';
 
 interface RecoveryDataPoint {
-  timeAfterGame: number; // hours after game
+  timeAfterSession: number; // hours after session
   emotionScore: number;
   baseline: number;
 }
@@ -11,19 +11,19 @@ interface RecoveryDataPoint {
 interface EmotionRecoveryChartProps {
   data: RecoveryDataPoint[];
   emotionName: string;
-  gameResult: 'win' | 'loss';
-  gameDate: string;
+  result: 'win' | 'loss';
+  date: string;
 }
 
 export default function EmotionRecoveryChart({
   data,
   emotionName,
-  gameResult,
-  gameDate
+  result,
+  date
 }: EmotionRecoveryChartProps) {
   const option = {
     title: {
-      text: `${emotionName} Recovery After ${gameResult === 'win' ? 'Win' : 'Loss'} (${gameDate})`,
+      text: `${emotionName} Recovery After ${result === 'win' ? 'Win' : 'Loss'} (${date})`,
       left: 'center'
     },
     tooltip: {
@@ -32,15 +32,15 @@ export default function EmotionRecoveryChart({
         const hours = params[0].axisValue;
         const emotion = params[0].data;
         const baseline = params[1].data;
-        return `Hours after game: ${hours}<br/>
+        return `Hours after session: ${hours}<br/>
                 ${emotionName}: ${emotion.toFixed(2)}<br/>
                 Baseline: ${baseline.toFixed(2)}`;
       }
     },
     xAxis: {
       type: 'category',
-      name: 'Hours After Game',
-      data: data.map(d => d.timeAfterGame),
+      name: 'Hours After Session',
+      data: data.map(d => d.timeAfterSession),
       axisLabel: {
         formatter: '{value}h'
       }
@@ -58,7 +58,7 @@ export default function EmotionRecoveryChart({
         smooth: true,
         data: data.map(d => d.emotionScore),
         itemStyle: {
-          color: gameResult === 'win' ? '#10b981' : '#ef4444'
+          color: result === 'win' ? '#10b981' : '#ef4444'
         },
         markPoint: {
           data: [

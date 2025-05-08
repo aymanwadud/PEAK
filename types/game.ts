@@ -1,4 +1,4 @@
-export interface GameSchedule {
+export interface Schedule {
   id: string;
   date: string;
   time: string;
@@ -7,11 +7,11 @@ export interface GameSchedule {
   notes?: string;
 }
 
-export type GameSession = 'pre-game' | 'post-game';
+export type SessionType = 'pre-session' | 'post-session';
 
-export interface GameMetrics {
+export interface Metrics {
   id: string;
-  gameId: string;
+  sessionId: string;
   metrics: {
     name: string;
     value: number;
