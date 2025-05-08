@@ -33,8 +33,8 @@ export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => {
 
   return (
     <div className="px-4 py-2 flex items-center h-14 z-50 bg-card border-b border-border flex-shrink-0">
-      {/* Left section with fixed width */}
-      <div className="w-[100px] flex items-center gap-2">
+      {/* Left section */}
+      <div className="flex items-center gap-2">
         {toggleSidebar && isSidebarOpen !== undefined && (
           <Button
             onClick={toggleSidebar}
@@ -54,8 +54,13 @@ export const Nav = ({ toggleSidebar, isSidebarOpen, onNewChat }: NavProps) => {
             <PlusCircle className="h-6 w-8" />
           </Button>
         )}
-        {/* Add the app title here */}
-        <span className="font-bold text-2xl ml-4">Peak</span>
+        <Button 
+          onClick={() => router.push('/')} 
+          variant="ghost"
+          className="font-bold text-2xl px-4 h-auto hover:bg-transparent hover:text-foreground"
+        >
+          Peak
+        </Button>
       </div>
 
       {/* Center section */}

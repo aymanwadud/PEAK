@@ -7,7 +7,7 @@ import { ActivityProvider } from "@/context/ActivityContext";
 import { SessionProvider } from "@/context/SessionContext";
 
 export const metadata: Metadata = {
-  title: "PeakForm",
+  title: "Peak",
   description: "Track and optimize your athletic performance through emotional intelligence",
 };
 

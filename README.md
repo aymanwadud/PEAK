@@ -1,35 +1,56 @@
 <div align="center">
-  <img src="https://storage.googleapis.com/hume-public-logos/hume/hume-banner.png">
-  <h1>PeakForm | Athletic Analytics</h1>
+  <h1>PEAK: Your AI Coach for High-Stakes Performance</h1>
+  <p>Originally developed as part of IPHS 484: Senior Seminar under Professor Katherine Elkins at Kenyon College</p>
 </div>
-
-![preview.png](preview.png)
 
 ## Overview
 
-PeakForm is an advanced athletic performance tracking platform that combines Hume's [Empathic Voice Interface](https://dev.hume.ai/docs/empathic-voice-interface-evi/overview) with analytics to help athletes optimize their mental game and achieve peak performance. Built with Next.js App Router, it includes both real-time emotional state tracking and comprehensive analytics.
+PEAK is an advanced AI coaching platform designed for high-stakes performers (e.g., athletes, artists, professionals) who need to integrate measurable outputs with subjective mental states. By leveraging real-time emotional data and performance analytics, PEAK provides comprehensive performance analysis with real-time emotional insights via Hume's Empathic Voice Interface (EVI).
 
 ### Key Features
 
-- 🎯 Sport-specific performance metrics
-- 🎨 Real-time emotional state tracking
-- 📊 Analytics with emotion correlation
-- 💫 Post-game recovery analysis
-- 🔍 Historical performance tracking
-- 📈 Emotional trend analysis
-- 🎙️ Voice-based interaction
-- 📱 Responsive design
+- 🎯 Real-time emotional state monitoring during sessions
+- 📊 Pre & post-performance emotion tracking
+- 💫 Customizable performance metric tracking
+- 🔍 User-defined analytical goals
+- 📈 Performance-emotion correlation insights
+- 🎙️ Seamless voice interaction for reflection & coaching
+- 📱 Cross-session pattern analysis
+- 🤖 AI-driven personalized feedback
 
-## Project deployment
+## Technical Implementation
 
-Click the button below to deploy this example project with Vercel:
+PEAK is built with modern web technologies including:
+- Next.js and TypeScript for robust frontend development
+- WebSocket connections for real-time data streaming
+- Integration with Hume's EVI for voice interaction
+- Real-time emotional state analysis during session recording
+- Comprehensive analytics post-session
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fhumeai%2Fhume-evi-next-js-starter&env=HUME_API_KEY,HUME_CLIENT_SECRET)
+### Core Components
 
-Below are the steps to completing deployment:
+#### Frontend Layer
+- Voice Providers: Manages voice interaction & WebSocket connections
+- Activity Context: Handles discipline/activity selection and customizable metrics
+- Session Manager: Orchestrates performance session flow and customizable metric tracking
+- Chat Interface: Real-time voice communication/analysis
 
-1. Create a Git Repository for your project.
-2. Provide the required environment variables. To get your API key and Secret key, log into the Hume AI Platform and visit the [API keys page](https://platform.hume.ai/settings/keys).
+#### Analytics Layer
+- EmotionRadarChart: Visualizes pre/post emotional states
+- EmotionPerformanceChart: Correlates performance with emotional states
+- EmotionRecoveryChart: Tracks emotional recovery patterns
+
+#### External Services
+- Hume EVI: Provides real-time emotional expression analysis
+- WebSocket Integration: Enables real-time voice streaming to EVI
+
+## Data Flow
+
+1. User initiates a session through SessionManager
+2. Chat component establishes WebSocket connection for voice interaction
+3. Voice data streams to Hume EVI for real-time emotional expression analysis
+4. Results are displayed in real-time via UI
+5. Post-session analysis correlates performance metrics with emotional states
 
 ## Local Development
 
@@ -116,6 +137,14 @@ Each user message in the chat history includes:
 - Framer Motion for animations
 - TypeScript for type safety
 
-## Contributing
+## Future Work & Ethics
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+- Developing ML models to forecast performance shifts
+- Exploring broader psychological insights
+- Conducting formal usability testing & efficacy studies
+- Ensuring ethical data privacy & user transparency
+- Investigating anonymized team insights
+
+## Acknowledgments
+
+Special thanks to Professor Katherine Elkins and the IPHS department at Kenyon College for their guidance on this project.
