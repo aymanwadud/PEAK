@@ -3,7 +3,7 @@ import { cn } from "@/utils";
 import { useVoice } from "@humeai/voice-react";
 import Expressions from "./Expressions";
 import { AnimatePresence, motion } from "framer-motion";
-import { ComponentRef, forwardRef } from "react";
+import { ComponentRef, forwardRef, useEffect, useRef } from "react";
 import { useSession } from "@/context/SessionContext";
 
 const Messages = forwardRef<
@@ -12,6 +12,22 @@ const Messages = forwardRef<
 >(function Messages(_, ref) {
   const { messages } = useVoice();
   const { sessionType } = useSession();
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Function to scroll to bottom
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  // Scroll on new messages
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const getSessionBadge = () => {
     if (!sessionType) return null;
@@ -30,8 +46,16 @@ const Messages = forwardRef<
   return (
     <motion.div
       layoutScroll
-      className="flex-1 min-h-0 overflow-y-auto relative flex flex-col"
-      ref={ref}
+      className="flex-1 min-h-0 overflow-y-auto relative flex flex-col scroll-smooth pb-28"
+      ref={(el) => {
+        // Handle both refs
+        if (typeof ref === 'function') {
+          ref(el);
+        } else if (ref) {
+          ref.current = el;
+        }
+        scrollRef.current = el;
+      }}
     >
       <motion.div
         className="max-w-2xl mx-auto w-full flex flex-col gap-4 p-4"
@@ -72,8 +96,7 @@ const Messages = forwardRef<
                   <div
                     className={cn(
                       "text-xs capitalize font-medium leading-none opacity-50 pt-4 px-3",
-                    )}
-                  >
+                    )}>
                     {msg.message.role}
                   </div>
                   <div className="pb-3 px-3">{msg.message.content}</div>
