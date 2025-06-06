@@ -18,6 +18,8 @@ PEAK is an advanced AI coaching platform designed for high-stakes performers (e.
 - 📱 Cross-session pattern analysis
 - 🤖 AI-driven personalized feedback
 
+![alt text](peak1.png)![alt text](peak2.png)![alt text](peak3.png)![alt text](peak4.png)
+
 ## Technical Implementation
 
 PEAK is built with modern web technologies including:
@@ -54,11 +56,10 @@ PEAK is built with modern web technologies including:
 
 ## Local Development
 
-1. Clone this examples repository:
+1. Clone this repository:
 
    ```shell
-   git clone https://github.com/humeai/hume-api-examples
-   cd hume-api-examples/evi/evi-next-js-app-router-quickstart
+   git clone https://github.com/aymanwadud/PEAK 
    ```
 
 2. Install dependencies:
@@ -69,36 +70,29 @@ PEAK is built with modern web technologies including:
 
 3. Set up your API key and Secret key:
 
-   In order to make an authenticated connection we will first need to generate an access token. Doing so will require your API key and Secret key. These keys can be obtained by logging into the Hume AI Platform and visiting the [API keys page](https://platform.hume.ai/settings/keys). For detailed instructions, see our documentation on [getting your api keys](https://dev.hume.ai/docs/introduction/api-key).
+   In order to make an authenticated connection we will first need to generate an access token. Doing so will require your API key and Secret key. These keys can be obtained by logging into the Hume AI Platform and visiting the [API keys page](https://platform.hume.ai/settings/keys). For detailed instructions, see their documentation on [getting your api keys](https://dev.hume.ai/docs/introduction/api-key).
 
    Place your `HUME_API_KEY` and `HUME_SECRET_KEY` in a `.env` file at the root of your project.
 
    ```shell
-   echo "HUME_API_KEY=your_api_key_here" > .env
+   echo "HUME_API_KEY=your_api_key_here" >> .env
    echo "HUME_SECRET_KEY=your_secret_key_here" >> .env
    ```
 
-   You can copy the `.env.example` file to use as a template.
-
 4. Specify an EVI configuration (Optional):
 
-   EVI is pre-configured with a set of default values, which are automatically applied if you do not specify a configuration. The default configuration includes a preset voice and language model, but does not include a system prompt or tools. To customize these options, you will need to create and specify your own EVI configuration. To learn more, see our [configuration guide](https://dev.hume.ai/docs/empathic-voice-interface-evi/configuration/build-a-configuration).
-
-   You may pass in a configuration ID to the `VoiceProvider` object inside the [components/Chat.tsx file](https://github.com/HumeAI/hume-api-examples/blob/main/evi/next-js/evi-next-js-app-router-quickstart/components/Chat.tsx).
-
-   Here's an example:
-
-   ```tsx
-   <VoiceProvider
-     configId="YOUR_CONFIG_ID"
-     auth={{ type: "accessToken", value: accessToken }}
-   >
+   EVI is pre-configured with a set of default values, which are automatically applied if you do not specify a configuration. The default configuration includes a preset voice and language model, but does not include a system prompt or tools. To customize these options, you will need to create and specify your own EVI configuration. To learn more, see their [configuration guide](https://dev.hume.ai/docs/empathic-voice-interface-evi/configuration/build-a-configuration).
+   
+   ```shell
+   echo "NEXT_PUBLIC_HUME_EVI_CONFIG_ID" >> .env
    ```
 
 5. Run the project:
    ```shell
    npm run dev
    ```
+
+6. Access the application at http://localhost:3000
 
 ## Features Guide
 
